@@ -2,26 +2,13 @@
 
 :root {
     --sidebar-width: 260px;
-    --sidebar-bg: #0f172a;
-    --sidebar-text: #cbd5e1;
-    --sidebar-active: rgba(59, 130, 246, 0.15);
-    --sidebar-active-text: #60a5fa;
-    --sidebar-hover: rgba(59, 130, 246, 0.05);
+    --sidebar-bg: var(--bg-sidebar);
+    --sidebar-text: var(--sidebar-text);
+    --sidebar-active: var(--bg-sidebar-active);
+    --sidebar-active-text: var(--sidebar-text-active);
+    --sidebar-hover: var(--bg-sidebar-hover);
     
     --topbar-height: 70px;
-    --bg-main: #f8fafc;
-    --content-bg: #ffffff;
-    --text-dark: #0f172a;
-    --border-soft: #e2e8f0;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-main: #1e293b;
-        --content-bg: #0f172a;
-        --text-dark: #f8fafc;
-        --border-soft: #334155;
-    }
 }
 
 * {
@@ -31,8 +18,8 @@
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-dark);
+    background-color: var(--bg-page);
+    color: var(--text-main);
 }
 
 .admin-layout {
@@ -160,8 +147,8 @@ body {
 
 .top-bar {
     height: var(--topbar-height);
-    background-color: var(--content-bg);
-    border-bottom: 1px solid var(--border-soft);
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-base);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -198,15 +185,17 @@ body {
 .user-info .name {
     font-weight: 600;
     font-size: 0.9rem;
+    color: var(--text-main);
 }
 
 .user-info .role {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .content-area {
     padding: 2rem;
     flex-grow: 1;
-    background-color: var(--bg-main);
+    background-color: var(--bg-page);
 }
+

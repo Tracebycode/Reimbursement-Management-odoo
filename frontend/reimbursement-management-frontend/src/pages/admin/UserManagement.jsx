@@ -6,23 +6,28 @@ const UserManagement = () => {
     const { users, addUser, updateUser, deleteUser } = useAdmin();
     const [isAddMode, setIsAddMode] = useState(false);
     const [editUserId, setEditUserId] = useState(null);
+    const [toast, setToast] = useState(null);
     
     const [newUser, setNewUser] = useState({
         name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: ''
     });
 
+    const generatePassword = (userEmail) => {
+        const pass = Math.random().toString(36).slice(-8);
+        setToast({ message: `Password for ${userEmail}: ${pass}`, type: 'success' });
+        setTimeout(() => setToast(null), 10000);
+    };
+
     const handleSaveUser = () => {
         if (!newUser.name || !newUser.email) {
-            alert("Name and Email are required");
+            setToast({ message: "Name and Email are required", type: 'error' });
             return;
         }
         if (editUserId) {
             updateUser(editUserId, newUser);
         } else {
             addUser(newUser);
-            // "Clicking on this button should send a randomly generated unique password..."
-            // Mocking the password email notification:
-            alert(`A unique random password has been sent to ${newUser.email}`);
+            generatePassword(newUser.email);
         }
         setNewUser({ name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: '' });
         setIsAddMode(false);
@@ -39,59 +44,46 @@ const UserManagement = () => {
 
     return (
         <div className="admin-page-container">
+            {toast && (
+                <div className={`toast-notification ${toast.type}`}>
+                    {toast.message}
+                    <button onClick={() => setToast(null)}>×</button>
+                </div>
+            )}
             <header className="page-header">
                 <div>
-                    <h1>Employee & Manager Management</h1>
-                    <p>Create and manage employees and managers within your organization.</p>
+                    <h1>User Management</h1>
+                    <p>Assign roles, managers, and manage credentials.</p>
                 </div>
                 {!isAddMode && (
-                    <button className="primary-action-btn" onClick={() => { setIsAddMode(true); setEditUserId(null); setNewUser({ name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: '' }); }}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Add New User
+                    <button className="primary-action-btn" onClick={() => setIsAddMode(true)}>
+                        New User
                     </button>
                 )}
             </header>
 
             <div className="card-container full-width">
                 {isAddMode && (
-                    <div className="add-user-panel slide-down">
-                        <h3>{editUserId ? 'Edit User' : 'Create New User'}</h3>
+                    <div className="add-user-panel slide-down" style={{marginBottom: '2rem'}}>
                         <div className="form-grid">
-                            <div className="form-group">
-                                <label>Full Name</label>
-                                <input type="text" className="fancy-input" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} placeholder="e.g. Jane Smith" />
-                            </div>
-                            <div className="form-group">
-                                <label>Email Address</label>
-                                <input type="email" className="fancy-input" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} placeholder="jane@company.com" />
-                            </div>
-                            <div className="form-group">
-                                <label>Role</label>
-                                <select className="fancy-select" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
-                                    <option value="EMPLOYEE">Employee</option>
-                                    <option value="MANAGER">Manager</option>
-                                    <option value="ADMIN">Admin</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Assign Manager (Optional)</label>
-                                <select className="fancy-select" value={newUser.manager_id} onChange={e => setNewUser({...newUser, manager_id: e.target.value})}>
-                                    <option value="">None / Self</option>
-                                    {managers.map(m => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Department</label>
-                                <input type="text" className="fancy-input" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})} placeholder="e.g. Finance" />
-                            </div>
+                            <input type="text" className="fancy-input" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} placeholder="User Name" />
+                            <select className="fancy-select" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
+                                <option value="EMPLOYEE">Employee</option>
+                                <option value="MANAGER">Manager</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
+                            <select className="fancy-select" value={newUser.manager_id} onChange={e => setNewUser({...newUser, manager_id: e.target.value})}>
+                                <option value="">Select Manager</option>
+                                {managers.map(m => (
+                                    <option key={m.id} value={m.id}>{m.name}</option>
+                                ))}
+                            </select>
+                            <input type="email" className="fancy-input" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} placeholder="Email" />
                         </div>
-                        <div className="panel-actions">
-                            <button className="btn-secondary" onClick={() => { setIsAddMode(false); setEditUserId(null); setNewUser({ name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: '' }); }}>Cancel</button>
-                            <button className="btn-primary" onClick={handleSaveUser}>{editUserId ? 'Update User' : 'Create User & Send Password'}</button>
+                        <div className="panel-actions" style={{marginTop: '1rem', justifyContent: 'flex-start', gap: '1rem'}}>
+                            <button className="btn-primary" onClick={handleSaveUser}>Save User</button>
+                            <button className="btn-secondary" onClick={() => setIsAddMode(false)}>Cancel</button>
                         </div>
-                        <p className="helper-text-bottom">Managers can approve expenses submitted by employees assigned to them.</p>
                     </div>
                 )}
 
@@ -99,42 +91,51 @@ const UserManagement = () => {
                     <table className="modern-table admin-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
+                                <th>User</th>
                                 <th>Role</th>
                                 <th>Manager</th>
-                                <th>Department</th>
-                                <th>Actions</th>
+                                <th>Email</th>
+                                <th style={{textAlign: 'right'}}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {users.map(user => (
                                 <tr key={user.id}>
                                     <td className="font-semibold">{user.name}</td>
-                                    <td><span className="text-muted">{user.email}</span></td>
                                     <td>
-                                        <span className={`role-pill role-${user.role.toLowerCase()}`}>
-                                            {user.role}
-                                        </span>
+                                        <select 
+                                            className="inline-select" 
+                                            value={user.role} 
+                                            onChange={(e) => updateUser(user.id, { role: e.target.value })}
+                                        >
+                                            <option value="EMPLOYEE">Employee</option>
+                                            <option value="MANAGER">Manager</option>
+                                            <option value="ADMIN">Admin</option>
+                                        </select>
                                     </td>
-                                    <td>{user.manager_id ? users.find(u => u.id === user.manager_id)?.name || 'Unknown' : 'N/A'}</td>
-                                    <td>{user.department}</td>
-                                    <td className="actions-cell">
-                                        <button className="btn-icon" title="Edit" onClick={() => handleEditClick(user)}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    <td>
+                                        <select 
+                                            className="inline-select" 
+                                            value={user.manager_id || ''} 
+                                            onChange={(e) => updateUser(user.id, { manager_id: e.target.value })}
+                                        >
+                                            <option value="">None</option>
+                                            {managers.filter(m => m.id !== user.id).map(m => (
+                                                <option key={m.id} value={m.id}>{m.name}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td><span className="text-muted">{user.email}</span></td>
+                                    <td style={{textAlign: 'right'}}>
+                                        <button className="send-pass-btn" onClick={() => generatePassword(user.email)}>
+                                            Send password
                                         </button>
-                                        <button className="btn-icon btn-danger" title="Delete" onClick={() => deleteUser(user.id)}>
+                                        <button className="btn-icon btn-danger" title="Delete" onClick={() => deleteUser(user.id)} style={{marginLeft: '0.5rem'}}>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                         </button>
-                                        <button className="text-btn text-small" onClick={() => alert(`Reset link sent to ${user.email}`)}>Send password</button>
                                     </td>
                                 </tr>
                             ))}
-                            {users.length === 0 && (
-                                <tr>
-                                    <td colSpan="6" className="empty-state">No users formally configured.</td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>

@@ -54,7 +54,7 @@ const Settings = () => {
                         />
                     </div>
 
-                    <div style={{height:'1px', background:'var(--border-soft)', margin:'1rem 0'}}></div>
+                    <div style={{height:'1px', background:'var(--border-base)', margin:'1rem 0'}}></div>
 
                     <div className="form-group">
                         <label>Country of Operation</label>
@@ -78,7 +78,7 @@ const Settings = () => {
                             className="fancy-input" 
                             value={settings.currency}
                             disabled 
-                            style={{backgroundColor: 'var(--bg-main)'}}
+                            style={{backgroundColor: 'var(--bg-page)'}}
                         />
                     </div>
                 </div>

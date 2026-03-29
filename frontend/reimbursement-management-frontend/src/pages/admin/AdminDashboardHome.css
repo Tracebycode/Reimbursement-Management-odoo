@@ -20,40 +20,13 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
-    color: var(--text-dark);
+    color: var(--text-main);
 }
 
 .page-header p {
-    color: #64748b;
+    color: var(--text-muted);
     margin: 0;
     font-size: 1rem;
-}
-
-.primary-action-btn {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-}
-
-.primary-action-btn:hover {
-    background-color: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px -2px rgba(59, 130, 246, 0.3);
-}
-
-.primary-action-btn svg {
-    width: 20px;
-    height: 20px;
 }
 
 /* Widgets Grid */
@@ -64,18 +37,18 @@
 }
 
 .widget-card {
-    background-color: var(--content-bg);
-    border: 1px solid var(--border-soft);
-    border-radius: 12px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-base);
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
 }
 
 .widget-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-secondary);
 }
 
 .widget-header {
@@ -88,15 +61,15 @@
 .widget-label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .widget-icon {
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: 10px;
     background-color: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    color: var(--accent-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -117,7 +90,7 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
-    color: var(--text-dark);
+    color: var(--text-main);
 }
 
 .widget-change {
@@ -125,26 +98,21 @@
     font-weight: 600;
 }
 
-.widget-change.positive {
-    color: #10b981;
-}
-
-.widget-change.negative {
-    color: #ef4444;
-}
+.widget-change.positive { color: var(--status-approved); }
+.widget-change.negative { color: var(--status-rejected); }
 
 /* Recent Activity Section */
 .recent-activity-section {
-    background-color: var(--content-bg);
-    border: 1px solid var(--border-soft);
-    border-radius: 12px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-base);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
 
 .section-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-base);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -154,13 +122,13 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-main);
 }
 
 .text-btn {
     background: transparent;
     border: none;
-    color: #3b82f6;
+    color: var(--accent-secondary);
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
@@ -181,20 +149,20 @@
 }
 
 .modern-table th {
-    background-color: var(--bg-main);
+    background-color: var(--bg-page);
     padding: 1rem 1.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 2.5px solid var(--border-base);
 }
 
 .modern-table td {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-soft);
-    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-base);
+    color: var(--text-main);
     font-size: 0.95rem;
 }
 
@@ -203,22 +171,23 @@
 }
 
 .modern-table tbody tr:hover {
-    background-color: var(--bg-main);
+    background-color: var(--bg-page);
 }
 
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
-.text-blue { color: #3b82f6; }
-.text-muted { color: #64748b; }
+.text-blue { color: var(--accent-secondary); }
+.text-muted { color: var(--text-muted); }
 
 .category-pill {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-soft);
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-base);
     padding: 0.25rem 0.75rem;
     border-radius: 99px;
     font-size: 0.85rem;
     font-weight: 500;
+    color: var(--text-main);
 }
 
 .status-badge {
@@ -228,17 +197,6 @@
     font-weight: 600;
 }
 
-.status-pending {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #d97706;
-}
-
-.status-approved {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #059669;
-}
-
-.status-rejected {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-}
+.status-pending { background-color: rgba(245, 158, 11, 0.15); color: var(--status-pending); }
+.status-approved { background-color: rgba(16, 185, 129, 0.15); color: var(--status-approved); }
+.status-rejected { background-color: rgba(239, 68, 68, 0.15); color: var(--status-rejected); }

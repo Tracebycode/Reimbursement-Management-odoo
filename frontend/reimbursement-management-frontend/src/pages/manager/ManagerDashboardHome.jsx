@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAdmin } from '../../context/AdminContext';
+import useCurrencyApi from '../../hooks/useCurrencyApi';
 import './ManagerPages.css';
 
 const ManagerDashboardHome = () => {
-    const { expenses, users, updateExpenseStatus } = useAdmin();
+    const { expenses, users, updateExpenseStatus, settings } = useAdmin();
+    // Assuming the company sets base currency like 'USD ($)' in settings
+    const companyBaseCurrencyCode = settings.currency ? settings.currency.split(' ')[0] : 'USD';
+    const { exchangeRates, loading, convert } = useCurrencyApi(companyBaseCurrencyCode);
 
     // In a real app, this would be the logged in user's ID
     // We are currently forcing "u2" (Sarah Jenkins) or "u3" (Mitchell Rose) who are managers.
@@ -12,8 +16,6 @@ const ManagerDashboardHome = () => {
     // or specifically expenses where the reporter's manager is the logged-in user.
     // For this mock, we will show all expenses to ensure the table populates.
     
-    // Mock currency conversion utility
-    const MOCK_EXCHANGE_RATE_TO_INR = 88; // 1 USD = 88 INR
 
     const handleApprove = (id) => {
         updateExpenseStatus(id, 'APPROVED');
@@ -51,8 +53,10 @@ const ManagerDashboardHome = () => {
                             const isReadonly = expense.status !== 'PENDING';
                             const employee = users.find(u => u.id === expense.user_id) || { name: 'Unknown' };
                             
-                            // Mock calculation
-                            const convertedAmount = Math.round(expense.amount * MOCK_EXCHANGE_RATE_TO_INR);
+                            // Real calculation based on API response
+                            const convertedAmount = !loading && convert 
+                                ? Math.round(convert(expense.amount, expense.currency, companyBaseCurrencyCode))
+                                : '...';
 
                             return (
                                 <tr key={expense.id} className={isReadonly ? 'readonly' : ''}>
@@ -68,7 +72,7 @@ const ManagerDashboardHome = () => {
                                         </span>
                                     </td>
                                     <td className="currency-amount">
-                                        {expense.amount} {expense.currency === 'USD' ? '$' : expense.currency} (in INR) = <span className="converted">{convertedAmount}</span>
+                                        {expense.amount} {expense.currency} (in {companyBaseCurrencyCode}) = <span className="converted">{convertedAmount}</span>
                                     </td>
                                     <td style={{textAlign: 'center'}}>
                                         {!isReadonly && (
