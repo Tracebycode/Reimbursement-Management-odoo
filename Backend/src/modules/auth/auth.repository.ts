@@ -14,7 +14,7 @@ export const insertOrganization = async (name: string, currency?: string) => {
 // Find a user by email
 export const getUserByEmail = async (email: string) => {
     const result = await pool.query(
-        `SELECT id, org_id, name, email, role, manager_id 
+        `SELECT id, org_id, name, email, role, manager_id, password 
          FROM users 
          WHERE email = $1`,
         [email]

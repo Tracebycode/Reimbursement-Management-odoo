@@ -61,10 +61,10 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 // POST /auth/login
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email } = req.body;
+        const { email ,password} = req.body;
 
-        if (!email) {
-            throw new AppError("email is required", 400);
+        if (!email || !password) {
+            throw new AppError("email and password are required", 400);
         }
 
         // Fetch user from DB
@@ -75,6 +75,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             throw new AppError("User not found", 404);
         }
 
+        if (user.password.trim() !== password.trim()) {
+            throw new AppError("Invalid password", 401);
+        }
         res.status(200).json({
             message: "Login successful",
             data: {
