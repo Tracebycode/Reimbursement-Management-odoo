@@ -6,11 +6,11 @@ import { insertOrganization, insertUser, getUserByEmail } from "./auth.repositor
 // POST /auth/signup
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, email, organization_name, currency } = req.body;
+        const { name, email, organization_name, currency, password } = req.body;
 
         // Input validation
-        if (!name || !email || !organization_name) {
-            throw new AppError("name, email, and organization_name are required", 400);
+        if (!name || !email || !organization_name || !password) {
+            throw new AppError("name, email, organization_name and password are required", 400);
         }
 
         // Check if user with this email already exists
@@ -33,8 +33,8 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 
             // 2. Insert admin user
             const userResult = await client.query(
-                `INSERT INTO users (org_id, name, email, role) VALUES ($1, $2, $3, 'admin') RETURNING id, org_id, name, email, role, manager_id`,
-                [org.id, name, email]
+                `INSERT INTO users (org_id, name, email, role,password) VALUES ($1, $2, $3, 'admin', $4) RETURNING id, org_id, name, email, role, manager_id`,
+                [org.id, name, email, password]
             );
             const user = userResult.rows[0];
 
