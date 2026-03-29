@@ -8,13 +8,14 @@ export const insertUser = async (
     name: string,
     email: string,
     role: string,
-    managerId?: number
+    managerId?: number,
+    password?: string
 ) => {
     const result = await pool.query(
-        `INSERT INTO users (org_id, name, email, role, manager_id)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO users (org_id, name, email, role, manager_id, password)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
-        [orgId, name, email, role, managerId || null]
+        [orgId, name, email, role, managerId || null, password || "password123"]
     );
     return result.rows[0];
 };

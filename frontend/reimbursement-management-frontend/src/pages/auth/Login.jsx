@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import './AuthPages.css';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const [error, setError] = useState('');
     const [showPass, setShowPass] = useState(false);
@@ -26,28 +27,22 @@ const Login = () => {
         try {
             setLoading(true);
 
-            const res = await api.post("/api/auth/login", {
-                email: formData.email,
-                password: formData.password
-            });
+            const res = await login(formData.email, formData.password);
 
-            const data = res.data;
-
-            console.log("LOGIN SUCCESS:", data);
-
-            // Save token
-            if (data.token) {
-                localStorage.setItem("token", data.token);
+            if (res.success) {
+                console.log("LOGIN SUCCESS:", res);
+                
+                // Navigate based on role
+                if (res.role === 'ADMIN' || res.role === 'admin') navigate('/admin/dashboard');
+                else if (res.role === 'MANAGER' || res.role === 'manager') navigate('/manager/dashboard');
+                else navigate('/employee/dashboard');
+            } else {
+                setError(res.message || "Login failed");
             }
-
-            // Navigate based on role
-            if (data.role === 'ADMIN') navigate('/admin/dashboard');
-            else if (data.role === 'MANAGER') navigate('/manager/dashboard');
-            else navigate('/employee/dashboard');
 
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || "Login failed");
+            setError("Login failed due to an unexpected error");
         } finally {
             setLoading(false);
         }

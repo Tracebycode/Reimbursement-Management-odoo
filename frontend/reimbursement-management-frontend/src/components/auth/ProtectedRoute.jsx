@@ -13,10 +13,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+    if (allowedRoles && !allowedRoles.map(r => r.toLowerCase()).includes(currentUser.role?.toLowerCase())) {
         // Redirect to appropriate dashboard if role not allowed
-        const defaultPath = currentUser.role === 'ADMIN' ? '/admin/dashboard' : 
-                          currentUser.role === 'MANAGER' ? '/manager/dashboard' : 
+        const userRole = currentUser.role?.toLowerCase();
+        const defaultPath = userRole === 'admin' ? '/admin/dashboard' : 
+                          userRole === 'manager' ? '/manager/dashboard' : 
                           '/employee/dashboard';
         return <Navigate to={defaultPath} replace />;
     }

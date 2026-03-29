@@ -9,7 +9,7 @@ import {
 // POST /users
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { org_id, name, email, role, manager_id } = req.body;
+        const { org_id, name, email, role, manager_id, password } = req.body;
 
         if (!org_id || !name || !email || !role) {
             throw new AppError("org_id, name, email, and role are required", 400);
@@ -19,7 +19,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
             throw new AppError("role must be a non-empty string", 400);
         }
 
-        const user = await insertUser(org_id, name, email, role, manager_id);
+        const user = await insertUser(org_id, name, email, role, manager_id, password);
 
         res.status(201).json({
             message: "User created successfully",

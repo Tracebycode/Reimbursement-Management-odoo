@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAdmin } from './AdminContext';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const { users, addUser, updateUser, updateSettings } = useAdmin();
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -14,66 +13,72 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const storedUser = localStorage.getItem('reimbursement_user');
         if (storedUser) {
-            setCurrentUser(JSON.parse(storedUser));
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                // If the user doesn't have an org_id, it is a stale mock session from before the API integration.
+                if (parsedUser && parsedUser.org_id !== undefined) {
+                    setCurrentUser(parsedUser);
+                } else {
+                    localStorage.removeItem('reimbursement_user');
+                    localStorage.removeItem('token');
+                }
+            } catch (err) {
+                console.error("Failed to parse stored user", err);
+                localStorage.removeItem('reimbursement_user');
+                localStorage.removeItem('token');
+            }
         }
         setLoading(false);
     }, []);
 
-    const login = (email, password) => {
-        const user = users.find(u => u.email === email && (u.password === password || password === 'admin123')); // simplified mock
-        if (user) {
+    const login = async (email, password) => {
+        try {
+            const res = await api.post("/api/auth/login", { email, password });
+            const user = res.data.data;
+            
+            // Set user matching our roles
             setCurrentUser(user);
             localStorage.setItem('reimbursement_user', JSON.stringify(user));
+            // Add a token anyway if needed by future endpoints
+            if (res.data.token) {
+                localStorage.setItem('token', res.data.token);
+            }
             return { success: true, role: user.role };
+        } catch (err) {
+            return { 
+                success: false, 
+                message: err.response?.data?.message || 'Invalid credentials'
+            };
         }
-        return { success: false, message: 'Invalid credentials' };
     };
 
-    const signup = (companyData) => {
-        // 1. Set Company Settings
-        updateSettings({
-            companyName: companyData.companyName,
-            adminName: companyData.name,
-            email: companyData.email,
-            country: companyData.country,
-            currency: companyData.currency
-        });
-
-        // 2. Create Admin User
-        const adminUser = {
-            name: companyData.name,
-            email: companyData.email,
-            password: companyData.password,
-            role: 'ADMIN',
-            created_at: new Date().toISOString()
-        };
-        
-        // We need to be careful here because addUser in AdminContext uses users.length for ID u1, u2...
-        // Let's ensure it's the first one.
-        addUser(adminUser);
-
-        // 3. Auto-login as Admin
-        const userWithId = { ...adminUser, id: 'u1' }; // Mock ID for first user
-        setCurrentUser(userWithId);
-        localStorage.setItem('reimbursement_user', JSON.stringify(userWithId));
-        
-        return { success: true };
+    const signup = async (companyData) => {
+        try {
+            const res = await api.post("/api/auth/signup", {
+                name: companyData.name,
+                email: companyData.email,
+                organization_name: companyData.companyName,
+                currency: companyData.currency,
+                password: companyData.password
+            });
+            return { success: true };
+        } catch (err) {
+            return {
+                success: false,
+                message: err.response?.data?.message || 'Signup failed'
+            };
+        }
     };
 
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem('reimbursement_user');
+        localStorage.removeItem('token');
     };
 
-    const forgotPassword = (email) => {
-        const user = users.find(u => u.email === email);
-        if (user) {
-            const tempPass = Math.random().toString(36).slice(-8);
-            // In mock, we update the user's password
-            updateUser(user.id, { password: tempPass });
-            return { success: true, tempPass };
-        }
-        return { success: false, message: 'User not found' };
+    const forgotPassword = async (email) => {
+        // Backend does not support forgot password currently.
+        return { success: false, message: 'Not supported by backend yet' };
     };
 
     return (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './AuthPages.css';
-import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
     const navigate = useNavigate();
+    const { signup } = useAuth();
 
     const [countries, setCountries] = useState([]);
     const [loadingCountries, setLoadingCountries] = useState(true);
@@ -84,23 +85,18 @@ const Signup = () => {
         try {
             setLoading(true);
 
-            const res = await api.post("/api/auth/signup", {
-                name: formData.name,
-                email: formData.email,
-                organization_name: formData.companyName,
-                currency: formData.currency,
-                password: formData.password
-            });
+            const res = await signup(formData);
 
-            console.log("Signup success:", res.data);
-
-            alert("Signup successful 🚀");
-
-            navigate("/login");
+            if (res.success) {
+                alert("Signup successful 🚀");
+                navigate("/login");
+            } else {
+                setError(res.message || "Signup failed");
+            }
 
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || "Signup failed");
+            setError("Signup failed unexpectedly.");
         } finally {
             setLoading(false);
         }

@@ -1,60 +1,100 @@
 import React, { useState, useEffect } from 'react';
-import { useAdmin } from '../../context/AdminContext';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import './AdminPages.css';
 
 const ApprovalRules = () => {
-    const { users, rules, updateRules } = useAdmin();
+    const { currentUser } = useAuth();
+    const [users, setUsers] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState(null);
-    const [currentRule, setCurrentRule] = useState(null);
+    const [currentSteps, setCurrentSteps] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (currentUser && currentUser.org_id) {
+            fetchUsers();
+        }
+    }, [currentUser]);
+
+    const fetchUsers = async () => {
+        try {
+            const res = await api.get('/api/users', { params: { org_id: currentUser.org_id } });
+            setUsers(res.data.data || []);
+        } catch (err) {
+            console.error("Failed to fetch users", err);
+        }
+    };
 
     const filteredUsers = users.filter(u => 
-        u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        u.role.toLowerCase().includes(searchTerm.toLowerCase())
+        u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        u.role?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // When selecting a user, load their rule or generate a default one
     useEffect(() => {
         if (selectedUserId) {
-            if (rules[selectedUserId]) {
-                setCurrentRule({...rules[selectedUserId]});
-            } else {
-                const userObj = users.find(u => u.id === selectedUserId);
-                setCurrentRule({
-                    description: `Standard rule for ${userObj.name}`,
-                    isManagerApprover: true,
-                    approvers: [],
-                    sequence: false,
-                    minimumPercentage: 100
-                });
-            }
+            fetchWorkflow(selectedUserId);
         } else {
-            setCurrentRule(null);
+            setCurrentSteps([]);
         }
-    }, [selectedUserId, rules, users]);
+    }, [selectedUserId]);
 
-    const handleSave = () => {
-        updateRules(selectedUserId, currentRule);
-        alert('Rules updated successfully!');
+    const fetchWorkflow = async (employeeId) => {
+        try {
+            setIsLoading(true);
+            const res = await api.get(`/api/workflow/${employeeId}`);
+            // Ensure step_order is correctly aligned for the UI array
+            const steps = res.data.data || [];
+            setCurrentSteps(steps.sort((a, b) => a.step_order - b.step_order));
+        } catch(err) {
+            if (err.response?.status === 404) {
+               setCurrentSteps([]); 
+            } else {
+               console.error("Failed to fetch workflow", err);
+               setCurrentSteps([]);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!selectedUserId) return;
+        try {
+            // Map the frontend currentSteps back into the DB expected format
+            const stepsPayload = currentSteps.map((s, index) => ({
+                step_order: index + 1,
+                role: s.role
+            }));
+            
+            await api.post('/api/workflow', {
+                employee_id: selectedUserId,
+                steps: stepsPayload
+            });
+            alert('Workflow rules updated successfully!');
+        } catch (err) {
+            console.error("Failed to save rules", err);
+            alert(err.response?.data?.message || 'Failed to update rules.');
+        }
     };
 
     const handleAddApprover = () => {
-        setCurrentRule({
-            ...currentRule,
-            approvers: [...currentRule.approvers, { user_id: '', required: false }]
-        });
+        setCurrentSteps([
+            ...currentSteps,
+            { step_order: currentSteps.length + 1, role: 'manager' }
+        ]);
     };
 
     const handleRemoveApprover = (index) => {
-        const updated = [...currentRule.approvers];
+        const updated = [...currentSteps];
         updated.splice(index, 1);
-        setCurrentRule({ ...currentRule, approvers: updated });
+        setCurrentSteps(updated);
     };
 
-    const handleApproverChange = (index, field, value) => {
-        const updated = [...currentRule.approvers];
-        updated[index][field] = value;
-        setCurrentRule({ ...currentRule, approvers: updated });
+    const handleApproverChange = (index, roleValue) => {
+        const updated = [...currentSteps];
+        updated[index].role = roleValue;
+        setCurrentSteps(updated);
     };
 
     return (
@@ -100,81 +140,44 @@ const ApprovalRules = () => {
                         <div style={{display:'flex', height:'100%', alignItems:'center', justifyContent:'center', color:'var(--text-muted)', fontStyle:'italic'}}>
                             Select a user from the left pane to configure their approval workflow.
                         </div>
-                    ) : currentRule && (
+                    ) : isLoading ? (
+                        <div style={{display:'flex', height:'100%', alignItems:'center', justifyContent:'center', color:'var(--text-muted)'}}>
+                            Loading workflow...
+                        </div>
+                    ) : (
                         <div className="animation-fade-in" style={{animation: 'fadeIn 0.3s ease-out'}}>
                             <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border-soft)', paddingBottom:'1rem', marginBottom:'1.5rem'}}>
                                 <h2>Configuration for <span className="text-blue">{users.find(u=>u.id === selectedUserId)?.name}</span></h2>
                                 <button className="btn-primary" onClick={handleSave}>Save Rules</button>
                             </div>
 
-                            <div className="form-grid">
-                                <div className="form-group" style={{gridColumn: '1 / -1'}}>
-                                    <label>Description about rules</label>
-                                    <input 
-                                        type="text" 
-                                        className="fancy-input" 
-                                        value={currentRule.description} 
-                                        onChange={e => setCurrentRule({...currentRule, description: e.target.value})} 
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Manager</label>
-                                    <input 
-                                        type="text" 
-                                        className="fancy-input" 
-                                        value={users.find(u=>u.id===users.find(curr=>curr.id===selectedUserId)?.manager_id)?.name || 'None'} 
-                                        disabled 
-                                    />
-                                    <p className="helper-text-bottom" style={{marginTop:'0.25rem'}}>Set on User record.</p>
-                                </div>
-                                <div className="form-group" style={{justifyContent: 'center', paddingTop: '1rem'}}>
-                                    <label className="checkbox-label">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={currentRule.isManagerApprover}
-                                            onChange={e => setCurrentRule({...currentRule, isManagerApprover: e.target.checked})}
-                                        />
-                                        Is Manager an approver?
-                                    </label>
-                                </div>
-                            </div>
-
                             <div style={{marginTop: '2rem'}}>
                                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem'}}>
-                                    <h3 style={{margin:0}}>Approval Steps</h3>
+                                    <h3 style={{margin:0}}>Approval Steps Sequence</h3>
                                     <button className="text-btn" onClick={handleAddApprover}>+ Add Step</button>
                                 </div>
 
-                                {currentRule.approvers.length === 0 && (
+                                {currentSteps.length === 0 && (
                                     <div className="empty-state" style={{padding:'1rem', textAlign:'center', background:'var(--bg-main)', border:'1px dashed var(--border-soft)', borderRadius:'8px', color:'var(--text-muted)'}}>
-                                        No specific approvers configured. (Will rely on manager if checked).
+                                        No workflow steps currently defined. All expenses will be automatically approved or rejected if no workflow is set. 
                                     </div>
                                 )}
 
-                                {currentRule.approvers.map((approver, index) => (
+                                {currentSteps.map((approverStep, index) => (
                                     <div key={index} className="approver-step-row">
                                         <div className="step-number">{index + 1}</div>
                                         <div style={{flexGrow: 1}}>
                                             <select 
                                                 className="fancy-select" 
-                                                value={approver.user_id}
-                                                onChange={e => handleApproverChange(index, 'user_id', e.target.value)}
+                                                value={approverStep.role}
+                                                onChange={e => handleApproverChange(index, e.target.value)}
                                             >
-                                                <option value="" disabled>Select User...</option>
-                                                {users.map(u => (
-                                                    <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
-                                                ))}
+                                                <option value="" disabled>Select Role Level...</option>
+                                                <option value="manager">Direct Manager</option>
+                                                <option value="hr">HR/Admin</option>
+                                                <option value="finance">Finance Team</option>
+                                                <option value="director">Director/Executive</option>
                                             </select>
-                                        </div>
-                                        <div style={{width: '200px'}}>
-                                            <label className="checkbox-label">
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={approver.required}
-                                                    onChange={e => handleApproverChange(index, 'required', e.target.checked)}
-                                                />
-                                                Required Approval
-                                            </label>
                                         </div>
                                         <button className="btn-icon btn-danger" onClick={() => handleRemoveApprover(index)}>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -182,35 +185,6 @@ const ApprovalRules = () => {
                                     </div>
                                 ))}
                             </div>
-
-                            <div style={{marginTop: '2rem', padding: '1.5rem', background: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-soft)'}}>
-                                <label className="checkbox-label" style={{marginBottom: '1rem', fontWeight: 600}}>
-                                    <input 
-                                        type="checkbox" 
-                                        checked={currentRule.sequence}
-                                        onChange={e => setCurrentRule({...currentRule, sequence: e.target.checked})}
-                                    />
-                                    Enforce Approvers Sequence
-                                </label>
-                                <p className="text-muted" style={{fontSize:'0.85rem', margin: '0 0 1.5rem 1.5rem'}}>
-                                    If checked, the request goes sequentially downwards strictly. If rejected at any step, it drops entirely. If unchecked, it blasts out concurrently.
-                                </p>
-                                
-                                <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-                                    <label style={{fontWeight:600}}>Minimum Approval percentage:</label>
-                                    <div style={{display:'flex', alignItems:'center', background:'var(--content-bg)', border:'1px solid var(--border-soft)', borderRadius:'6px', padding:'0.2rem 0.5rem'}}>
-                                        <input 
-                                            type="number" 
-                                            value={currentRule.minimumPercentage}
-                                            onChange={e => setCurrentRule({...currentRule, minimumPercentage: e.target.value})}
-                                            min="0" max="100"
-                                            style={{border:'none', outline:'none', background:'transparent', width:'50px', textAlign:'right', fontWeight:600}}
-                                        />
-                                        <span style={{color:'var(--text-muted)', marginLeft:'0.2rem'}}>%</span>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     )}
                 </div>

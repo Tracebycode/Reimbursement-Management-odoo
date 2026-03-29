@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import useCurrencyApi from '../../hooks/useCurrencyApi';
 import { useAdmin } from '../../context/AdminContext';
+import { useAuth } from '../../context/AuthContext';
 import '../../pages/employee/EmployeePages.css';
 
 const ExpenseFormModal = ({ onClose, expenseConfig, isAutoFillMode }) => {
+    // expenseConfig can be null (New Expense) or an existing expense object (Viewing/Editing Draft)
+    const { currentUser } = useAuth();
     // expenseConfig can be null (New Expense) or an existing expense object (Viewing/Editing Draft)
     const { addExpense, updateExpenseStatus, settings } = useAdmin();
     // Default base currency from settings
@@ -16,8 +20,8 @@ const ExpenseFormModal = ({ onClose, expenseConfig, isAutoFillMode }) => {
     const [formData, setFormData] = useState({
         description: isExisting ? expenseConfig.description : '',
         expenseDate: isExisting ? expenseConfig.created_at.split('T')[0] : '',
-        category: isExisting ? expenseConfig.category : '',
-        paidBy: isExisting ? expenseConfig.user_id : 'u5', // default to user u5 (John Doe) mock logged in
+        category: isExisting ? expenseConfig.category || '' : '',
+        paidBy: currentUser.id, // Bind securely to authorized user ID
         amount: isExisting ? expenseConfig.amount : '',
         currency: isExisting ? expenseConfig.currency : companyBaseCurrencyCode,
         remarks: isExisting ? expenseConfig.remarks || '' : '',
@@ -72,29 +76,26 @@ const ExpenseFormModal = ({ onClose, expenseConfig, isAutoFillMode }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (isExisting) {
-            // Update to PENDING
-            updateExpenseStatus(expenseConfig.id, 'PENDING', 'John Doe');
+            // Update to PENDING not supported yet by current backend logic, typically frontend would call PUT endpoint here
+            return onClose();
         } else {
             // Create New
-            const newExp = {
-                user_id: formData.paidBy,
-                amount: parseFloat(formData.amount),
-                description: formData.description,
-                category: formData.category,
-                currency: formData.currency,
-                status: 'PENDING',
-                remarks: formData.remarks,
-                notes: formData.notes
-            };
-            addExpense(newExp);
-            // It gets added with action_logs: [] in context, but since we are submitting it immediately:
-            // Normally we'd do this inside addExpense logic or chained, but context addExpense logic is simple.
+            try {
+                await api.post('/api/expense', {
+                    user_id: parseInt(currentUser.id, 10),
+                    amount: parseFloat(formData.amount),
+                    description: formData.description || 'General Expense'
+                    // backend currently ignores category, currency, remarks for insertion, but frontend renders them locally
+                });
+                onClose();
+            } catch (err) {
+                alert(err.response?.data?.message || "Failed to submit expense. Maybe no workflow rule assigned?");
+            }
         }
-        onClose();
     };
 
     return (
@@ -158,9 +159,7 @@ const ExpenseFormModal = ({ onClose, expenseConfig, isAutoFillMode }) => {
 
                         <div className="form-group">
                             <label>Paid by:</label>
-                            <select name="paidBy" value={formData.paidBy} onChange={handleChange} disabled={isReadonly} className="form-input">
-                                <option value="u5">John Doe</option>
-                            </select>
+                            <input type="text" value={currentUser.name} disabled className="form-input" style={{backgroundColor: 'var(--employee-sidebar-bg)'}} />
                         </div>
 
                         <div className="form-group">

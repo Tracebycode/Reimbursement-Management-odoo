@@ -1,46 +1,79 @@
-import React, { useState } from 'react';
-import { useAdmin } from '../../context/AdminContext';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import './AdminPages.css';
 
 const UserManagement = () => {
-    const { users, addUser, updateUser, deleteUser } = useAdmin();
+    const { currentUser } = useAuth();
+    const [users, setUsers] = useState([]);
+    
     const [isAddMode, setIsAddMode] = useState(false);
-    const [editUserId, setEditUserId] = useState(null);
     const [toast, setToast] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     
     const [newUser, setNewUser] = useState({
-        name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: ''
+        name: '', email: '', role: 'employee', manager_id: '', department: ''
     });
 
-    const generatePassword = (userEmail) => {
-        const pass = Math.random().toString(36).slice(-8);
-        setToast({ message: `Password for ${userEmail}: ${pass}`, type: 'success' });
-        setTimeout(() => setToast(null), 10000);
+    useEffect(() => {
+        if (currentUser && currentUser.org_id) {
+            fetchUsers();
+        }
+    }, [currentUser]);
+
+    const fetchUsers = async () => {
+        try {
+            setIsLoading(true);
+            const res = await api.get('/api/users', { params: { org_id: currentUser.org_id } });
+            setUsers(res.data.data || []);
+        } catch (err) {
+            console.error("Failed to fetch users", err);
+            setToast({ message: "Failed to load users", type: 'error' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleSaveUser = () => {
+    const generatePassword = (userEmail) => {
+        const pass = "password123"; // Using mock generation as we don't have an email service
+        setToast({ message: `Password for ${userEmail}: ${pass}`, type: 'success' });
+        setTimeout(() => setToast(null), 10000);
+        return pass;
+    };
+
+    const handleSaveUser = async () => {
         if (!newUser.name || !newUser.email) {
             setToast({ message: "Name and Email are required", type: 'error' });
             return;
         }
-        if (editUserId) {
-            updateUser(editUserId, newUser);
-        } else {
-            addUser(newUser);
-            generatePassword(newUser.email);
+        
+        const tempPass = generatePassword(newUser.email);
+        
+        try {
+            await api.post('/api/users', {
+                org_id: parseInt(currentUser.org_id, 10),
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role.toLowerCase(), // Ensure lowercase as expected by backend
+                manager_id: newUser.manager_id ? parseInt(newUser.manager_id, 10) : undefined,
+                password: tempPass
+            });
+            
+            setToast({ message: "User created successfully", type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+            
+            // Reload users
+            fetchUsers();
+            
+            setNewUser({ name: '', email: '', role: 'employee', manager_id: '', department: '' });
+            setIsAddMode(false);
+            
+        } catch (err) {
+            setToast({ message: err.response?.data?.message || "Failed to create user", type: 'error' });
         }
-        setNewUser({ name: '', email: '', role: 'EMPLOYEE', manager_id: '', department: '' });
-        setIsAddMode(false);
-        setEditUserId(null);
     };
 
-    const handleEditClick = (user) => {
-        setNewUser({ name: user.name, email: user.email, role: user.role, manager_id: user.manager_id || '', department: user.department || '' });
-        setEditUserId(user.id);
-        setIsAddMode(true);
-    };
-
-    const managers = users.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN');
+    const managers = users.filter(u => u.role?.toLowerCase() === 'manager' || u.role?.toLowerCase() === 'admin');
 
     return (
         <div className="admin-page-container">
@@ -68,9 +101,12 @@ const UserManagement = () => {
                         <div className="form-grid">
                             <input type="text" className="fancy-input" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} placeholder="User Name" />
                             <select className="fancy-select" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
-                                <option value="EMPLOYEE">Employee</option>
-                                <option value="MANAGER">Manager</option>
-                                <option value="ADMIN">Admin</option>
+                                <option value="employee">Employee</option>
+                                <option value="manager">Manager</option>
+                                <option value="hr">HR/Admin</option>
+                                <option value="finance">Finance</option>
+                                <option value="director">Director/Executive</option>
+                                <option value="admin">System Admin</option>
                             </select>
                             <select className="fancy-select" value={newUser.manager_id} onChange={e => setNewUser({...newUser, manager_id: e.target.value})}>
                                 <option value="">Select Manager</option>
@@ -88,59 +124,43 @@ const UserManagement = () => {
                 )}
 
                 <div className="table-wrapper">
-                    <table className="modern-table admin-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Manager</th>
-                                <th>Email</th>
-                                <th style={{textAlign: 'right'}}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map(user => (
-                                <tr key={user.id}>
-                                    <td className="font-semibold">{user.name}</td>
-                                    <td>
-                                        <select 
-                                            className="inline-select" 
-                                            value={user.role} 
-                                            onChange={(e) => updateUser(user.id, { role: e.target.value })}
-                                        >
-                                            <option value="EMPLOYEE">Employee</option>
-                                            <option value="MANAGER">Manager</option>
-                                            <option value="ADMIN">Admin</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select 
-                                            className="inline-select" 
-                                            value={user.manager_id || ''} 
-                                            onChange={(e) => updateUser(user.id, { manager_id: e.target.value })}
-                                        >
-                                            <option value="">None</option>
-                                            {managers.filter(m => m.id !== user.id).map(m => (
-                                                <option key={m.id} value={m.id}>{m.name}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                    <td><span className="text-muted">{user.email}</span></td>
-                                    <td style={{textAlign: 'right'}}>
-                                        <button className="send-pass-btn" onClick={() => generatePassword(user.email)}>
-                                            Send password
-                                        </button>
-                                        <button className="btn-icon btn-danger" title="Delete" onClick={() => deleteUser(user.id)} style={{marginLeft: '0.5rem'}}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                        </button>
-                                    </td>
+                        {isLoading ? (
+                            <p style={{padding: '2rem', textAlign: 'center'}}>Loading users...</p>
+                        ) : (
+                        <table className="modern-table admin-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Manager</th>
+                                    <th>Email</th>
+                                    <th style={{textAlign: 'right'}}>Action</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {users.map(user => (
+                                    <tr key={user.id}>
+                                        <td className="font-semibold">{user.name}</td>
+                                        <td>
+                                            <span className="role-badge" style={{textTransform: 'capitalize'}}>{user.role}</span>
+                                        </td>
+                                        <td>
+                                            {managers.find(m => String(m.id) === String(user.manager_id))?.name || "None"}
+                                        </td>
+                                        <td><span className="text-muted">{user.email}</span></td>
+                                        <td style={{textAlign: 'right'}}>
+                                            <button className="send-pass-btn" onClick={() => generatePassword(user.email)}>
+                                                Send password
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
     );
 };
 

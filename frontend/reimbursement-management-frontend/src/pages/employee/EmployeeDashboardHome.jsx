@@ -1,24 +1,40 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { useAdmin } from '../../context/AdminContext';
 import useCurrencyApi from '../../hooks/useCurrencyApi';
 import ExpenseFormModal from '../../components/employee/ExpenseFormModal';
 import './EmployeePages.css';
 
 const EmployeeDashboardHome = () => {
-    const { expenses, users, settings } = useAdmin();
+    const { currentUser } = useAuth();
+    const { settings } = useAdmin();
     // Assuming the company sets base currency like 'USD ($)' in settings
-    const companyBaseCurrencyCode = settings.currency ? settings.currency.split(' ')[0] : 'USD';
+    const companyBaseCurrencyCode = settings?.currency ? settings.currency.split(' ')[0] : 'USD';
     const { convert, loading: currencyLoading } = useCurrencyApi(companyBaseCurrencyCode);
 
-    // In our mock, the employee is "u5" (John Doe)
-    const CURRENT_USER_ID = 'u5';
-    
+    const [myExpenses, setMyExpenses] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     const [selectedExpense, setSelectedExpense] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAutoFill, setIsAutoFill] = useState(false);
 
-    // Filter to only this user's expenses
-    const myExpenses = useMemo(() => expenses.filter(exp => exp.user_id === CURRENT_USER_ID), [expenses, CURRENT_USER_ID]);
+    const fetchExpenses = async () => {
+        try {
+            setIsLoading(true);
+            const res = await api.get('/api/expenses', { params: { user_id: currentUser.id } });
+            setMyExpenses(res.data.data || []);
+        } catch (err) {
+            console.error("Failed to load expenses", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (currentUser?.id) fetchExpenses();
+    }, [currentUser]);
 
     // Calculate totals with live currency conversion
     const getConvertedTotal = (status) => {
@@ -123,16 +139,17 @@ const EmployeeDashboardHome = () => {
                         {myExpenses.length === 0 ? (
                             <tr><td colSpan="7" style={{textAlign:'center'}}>You have no expenses logged.</td></tr>
                         ) : myExpenses.map(expense => {
-                            const employee = users.find(u => u.id === expense.user_id) || { name: 'Unknown' };
+                            // Handle database field name mismatches securely
+                            const amount = typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount;
                             
                             let statusBadgeStyle = { padding: '2px 8px', borderRadius: '12px', fontWeight: '500' };
-                            if (expense.status === 'DRAFT') {
+                            if (expense.status === 'draft' || expense.status === 'DRAFT') {
                                 statusBadgeStyle = { ...statusBadgeStyle, border: '1px solid #94a3b8', color: '#94a3b8' };
-                            } else if (expense.status === 'PENDING') {
+                            } else if (expense.status === 'pending' || expense.status === 'PENDING') {
                                 statusBadgeStyle = { ...statusBadgeStyle, border: '1px solid #fbbf24', color: '#fbbf24' }; // Saffron/Yellow for pending
-                            } else if (expense.status === 'APPROVED') {
+                            } else if (expense.status === 'approved' || expense.status === 'APPROVED') {
                                 statusBadgeStyle = { ...statusBadgeStyle, border: '1px solid #10b981', color: '#10b981', fontWeight: 'bold' };
-                            } else if (expense.status === 'REJECTED') {
+                            } else if (expense.status === 'rejected' || expense.status === 'REJECTED') {
                                 statusBadgeStyle = { ...statusBadgeStyle, border: '1px solid #ef4444', color: '#ef4444', fontWeight: 'bold' };
                             }
 
@@ -140,10 +157,10 @@ const EmployeeDashboardHome = () => {
                                 <tr key={expense.id} onClick={() => openExistingForm(expense)} style={{cursor:'pointer'}}>
                                     <td>{expense.description}</td>
                                     <td>{new Date(expense.created_at).toLocaleDateString()}</td>
-                                    <td>{expense.category}</td>
-                                    <td>{employee.name}</td>
+                                    <td>{expense.category || 'General'}</td>
+                                    <td>{currentUser.name}</td>
                                     <td>{expense.remarks || 'None'}</td>
-                                    <td>{expense.amount} {expense.currency}</td>
+                                    <td>{amount} {expense.currency || companyBaseCurrencyCode}</td>
                                     <td>
                                         <span style={statusBadgeStyle}>
                                             {expense.status === 'PENDING' ? 'Submitted' : expense.status.charAt(0) + expense.status.slice(1).toLowerCase()}
@@ -158,7 +175,10 @@ const EmployeeDashboardHome = () => {
 
             {isModalOpen && (
                 <ExpenseFormModal 
-                    onClose={() => setIsModalOpen(false)} 
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        fetchExpenses();
+                    }} 
                     expenseConfig={selectedExpense} 
                     isAutoFillMode={isAutoFill}
                 />
