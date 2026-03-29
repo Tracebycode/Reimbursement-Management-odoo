@@ -390,6 +390,6 @@ Reimbursement-Management-App/
 
 ---
 
-## 📜 License
+## 📜 License.
 
 ISC
