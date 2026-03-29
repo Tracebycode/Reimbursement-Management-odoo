@@ -26,7 +26,12 @@ export const AdminProvider = ({ children }) => {
         { id: "EXP-8900", org_id: orgId, user_id: "u5", amount: 45, description: "Team lunch", status: "APPROVED", created_at: "2026-06-11T09:15:00Z", category: "Meals", currency: "USD", receipt_image: null },
         { id: "EXP-8899", org_id: orgId, user_id: "u4", amount: 320, description: "New monitor", status: "APPROVED", created_at: "2026-06-10T08:00:00Z", category: "Office Supplies", currency: "USD", receipt_image: null },
         { id: "EXP-8898", org_id: orgId, user_id: "u5", amount: 850, description: "Client dinner", status: "REJECTED", created_at: "2026-06-09T17:30:00Z", category: "Entertainment", currency: "USD", receipt_image: null },
+        { id: "EXP-8897", org_id: orgId, user_id: "u5", amount: 567, description: "Marketing Campaign Tools", status: "PENDING", created_at: "2026-06-14T11:20:00Z", category: "Software", currency: "USD", receipt_image: null },
     ]);
+
+    const updateExpenseStatus = (id, newStatus) => {
+        setExpenses(expenses.map(exp => exp.id === id ? { ...exp, status: newStatus } : exp));
+    };
 
     // 3. Approval Rules State
     // Restoring structure based on original UI preferences:
@@ -60,7 +65,7 @@ export const AdminProvider = ({ children }) => {
     return (
         <AdminContext.Provider value={{
             users, addUser, updateUser, deleteUser,
-            expenses, setExpenses,
+            expenses, setExpenses, updateExpenseStatus,
             rules, updateRules,
             settings, updateSettings
         }}>

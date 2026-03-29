@@ -1,0 +1,137 @@
+/* ManagerPages.css */
+
+.manager-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.manager-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--manager-text-primary);
+}
+
+.manager-header p {
+    color: var(--manager-text-muted);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.manager-card {
+    background-color: var(--manager-sidebar-bg); /* Use slightly raised element color */
+    border: 1px solid var(--manager-sidebar-border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.manager-table-header {
+    padding: 1rem 1.5rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-bottom: 2px solid var(--manager-sidebar-border);
+}
+
+.manager-table-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--manager-text-primary);
+}
+
+.manager-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.manager-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    color: var(--manager-text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--manager-sidebar-border);
+}
+
+.manager-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--manager-sidebar-border);
+    vertical-align: middle;
+}
+
+.manager-table tr.readonly td {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--manager-text-muted);
+}
+
+.manager-table tr:last-child td {
+    border-bottom: none;
+}
+
+.manager-table tr:hover:not(.readonly) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Action Buttons */
+.manager-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-approve, .btn-reject {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.btn-approve {
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.btn-approve:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+}
+
+.btn-reject {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-reject:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+/* Currency String Styling */
+.currency-amount {
+    color: #f87171; /* red-ish color matching the wireframe annotation */
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.currency-amount .converted {
+    color: #e4e6eb; /* Whiteish color matching wireframe */
+    font-weight: 600;
+}

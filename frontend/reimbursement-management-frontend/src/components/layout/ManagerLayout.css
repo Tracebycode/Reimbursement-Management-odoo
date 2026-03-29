@@ -1,0 +1,115 @@
+:root {
+    --manager-sidebar-bg: #1e1e2d;
+    --manager-sidebar-border: #2d2d3f;
+    --manager-sidebar-hover: #2b2b3f;
+    --manager-text-primary: #e4e6eb;
+    --manager-text-muted: #a1a1aa;
+    --manager-accent: #10b981; /* Green accent for managers */
+    --manager-accent-hover: #059669;
+}
+
+.manager-layout {
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-main);
+    color: var(--manager-text-primary);
+    overflow: hidden;
+}
+
+.manager-sidebar {
+    width: 250px;
+    background-color: var(--manager-sidebar-bg);
+    border-right: 1px solid var(--manager-sidebar-border);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.manager-sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--manager-sidebar-border);
+}
+
+.manager-sidebar-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.manager-sidebar-brand {
+    font-size: 0.8rem;
+    color: var(--manager-text-muted);
+    font-weight: 500;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.manager-sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+}
+
+.manager-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--manager-text-muted);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.manager-nav-link svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+.manager-nav-link:hover {
+    background-color: var(--manager-sidebar-hover);
+    color: var(--manager-text-primary);
+}
+
+.manager-nav-link.active {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--manager-accent);
+    box-shadow: inset 3px 0 0 var(--manager-accent);
+}
+
+.manager-sidebar-footer {
+    padding: 1.5rem 1rem;
+    border-top: 1px solid var(--manager-sidebar-border);
+}
+
+.manager-nav-link.logout {
+    color: #ef4444;
+}
+.manager-nav-link.logout:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.manager-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background-color: var(--bg-main);
+    position: relative;
+    padding: 2rem;
+}
