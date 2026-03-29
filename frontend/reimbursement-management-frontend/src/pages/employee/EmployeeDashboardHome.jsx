@@ -38,10 +38,13 @@ const EmployeeDashboardHome = () => {
 
     // Calculate totals with live currency conversion
     const getConvertedTotal = (status) => {
-        if (currencyLoading) return '...';
+        if (currencyLoading || !myExpenses) return '...';
         const total = myExpenses
-            .filter(e => e.status === status)
-            .reduce((sum, e) => sum + convert(e.amount, e.currency, companyBaseCurrencyCode), 0);
+            .filter(e => e.status?.toLowerCase() === status.toLowerCase())
+            .reduce((sum, e) => {
+                const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : (e.amount || 0);
+                return sum + convert(amount, e.currency || companyBaseCurrencyCode, companyBaseCurrencyCode);
+            }, 0);
         return Math.round(total).toLocaleString();
     };
 

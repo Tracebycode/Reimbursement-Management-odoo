@@ -73,7 +73,8 @@ const UserManagement = () => {
         }
     };
 
-    const managers = users.filter(u => u.role?.toLowerCase() === 'manager' || u.role?.toLowerCase() === 'admin');
+    // Anyone who isn't a basic 'employee' can act as a manager for workflow purposes
+    const managers = users.filter(u => u.role?.toLowerCase() !== 'employee');
 
     return (
         <div className="admin-page-container">
