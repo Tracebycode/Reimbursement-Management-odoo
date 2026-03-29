@@ -6,7 +6,7 @@ function App() {
 
   return (
     <>
-     <div>this is the new page</div>
+     <div>this is the new page 1</div>
     </>
   )
 }
