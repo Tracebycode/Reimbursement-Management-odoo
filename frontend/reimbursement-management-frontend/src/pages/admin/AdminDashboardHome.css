@@ -1,0 +1,202 @@
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-main);
+}
+
+.page-header p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Widgets Grid */
+.widgets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.widget-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-base);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.widget-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-secondary);
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.widget-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.widget-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--accent-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.widget-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.widget-body {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.widget-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.widget-change {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.widget-change.positive { color: var(--status-approved); }
+.widget-change.negative { color: var(--status-rejected); }
+
+/* Recent Activity Section */
+.recent-activity-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-base);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-base);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent-secondary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.text-btn:hover {
+    text-decoration: underline;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.modern-table th {
+    background-color: var(--bg-page);
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2.5px solid var(--border-base);
+}
+
+.modern-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-base);
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.modern-table tbody tr:hover {
+    background-color: var(--bg-page);
+}
+
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.text-blue { color: var(--accent-secondary); }
+.text-muted { color: var(--text-muted); }
+
+.category-pill {
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-base);
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-pending { background-color: rgba(245, 158, 11, 0.15); color: var(--status-pending); }
+.status-approved { background-color: rgba(16, 185, 129, 0.15); color: var(--status-approved); }
+.status-rejected { background-color: rgba(239, 68, 68, 0.15); color: var(--status-rejected); }
