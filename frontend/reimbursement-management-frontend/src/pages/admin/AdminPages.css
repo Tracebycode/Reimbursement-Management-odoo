@@ -1,0 +1,286 @@
+/* AdminPages.css - Shared styles for Admin subpages */
+.admin-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-dark);
+}
+
+.page-header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.primary-action-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.primary-action-btn:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -2px rgba(59, 130, 246, 0.3);
+}
+
+.primary-action-btn svg { width: 20px; height: 20px; }
+
+.card-container {
+    background-color: var(--content-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.card-container.full-width {
+    width: 100%;
+}
+
+/* User Management Specifics */
+.add-user-panel {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); height: 0; overflow: hidden; }
+    to { opacity: 1; transform: translateY(0); height: auto; }
+}
+
+.add-user-panel h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.fancy-input, .fancy-select {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-soft);
+    background-color: var(--content-bg);
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.fancy-input:focus, .fancy-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.65rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary { background-color: #3b82f6; color: white; border: none; }
+.btn-primary:hover { background-color: #2563eb; }
+.btn-secondary { background-color: transparent; color: var(--text-dark); border: 1px solid var(--border-soft); }
+.btn-secondary:hover { background-color: var(--bg-main); }
+
+.helper-text-bottom {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 1rem 0 0 0;
+}
+
+/* Tables */
+.table-wrapper { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-table th {
+    padding: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border-soft);
+}
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover { background-color: rgba(59, 130, 246, 0.02); }
+
+.font-semibold { font-weight: 600; }
+.text-muted { color: #64748b; }
+
+.role-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.role-admin { background-color: rgba(139, 92, 246, 0.15); color: #7c3aed; }
+.role-manager { background-color: rgba(245, 158, 11, 0.15); color: #d97706; }
+.role-employee { background-color: rgba(16, 185, 129, 0.15); color: #059669; }
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+.btn-icon:hover { background-color: var(--bg-main); color: #3b82f6; }
+.btn-icon.btn-danger:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+.btn-icon svg { width: 18px; height: 18px; }
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    font-weight: 500;
+    cursor: pointer;
+}
+.text-btn:hover { text-decoration: underline; }
+.text-small { font-size: 0.8rem; }
+
+/* Approval Rules Page Styling Additions */
+.rules-wrapper {
+    display: flex;
+    gap: 2rem;
+}
+.rules-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-soft);
+    padding-right: 1.5rem;
+}
+.rules-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.rules-user-item {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.rules-user-item:hover {
+    background-color: var(--bg-main);
+}
+.rules-user-item.active {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+}
+.rules-main {
+    flex-grow: 1;
+}
+
+.approver-step-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    background-color: var(--border-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
